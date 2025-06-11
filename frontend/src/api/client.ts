@@ -4,6 +4,7 @@ import { jwtDecode } from 'jwt-decode';
 
 const api = axios.create({
   baseURL: 'http://localhost:8000/api',
+  //baseURL: "https://30c4-41-188-143-58.ngrok-free.app/api/",
   withCredentials: true,
 });
 
@@ -20,6 +21,9 @@ api.interceptors.request.use(async (config) => {
         const response = await axios.post('http://localhost:8000/api/auth/refresh/', {
           refresh: refreshToken
         });
+        // const response = await axios.post('https://30c4-41-188-143-58.ngrok-free.app/api/auth/refresh/', {
+        //    refresh: refreshToken
+        //  });
         localStorage.setItem('access_token', response.data.access);
         config.headers.Authorization = `Bearer ${response.data.access}`;
       } catch (error) {

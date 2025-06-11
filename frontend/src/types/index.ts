@@ -30,3 +30,32 @@ export interface MonthlyInvestment {
   roi: number;
   is_profitable: boolean;
 }
+
+// types exporting
+export type Investment = {
+  id: number;
+  goal: {
+    id: number;
+    name: string;
+    investment_type: string;
+  };
+  date: string;
+  purchase_price: number;
+  quantity: string;
+  current_price: number | null;
+  notes: string;
+  total_cost: string;
+  current_value: string;
+  gain_loss: string;
+  roi: string;
+  is_profitable: boolean;
+};
+
+export type Investment_Goal = {
+  id: number;
+  name: string;
+  investment_type: string;
+  target_amount: number;
+  years_to_invest: number;
+  monthly_contribution: number
+};
