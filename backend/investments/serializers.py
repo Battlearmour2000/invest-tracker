@@ -2,44 +2,6 @@ from rest_framework import serializers
 from .models import InvestmentGoal, MonthlyInvestment
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-class MonthlyInvestmentSerializer(serializers.ModelSerializer):
-    total_cost = serializers.DecimalField(
-        max_digits=15, 
-        decimal_places=2, 
-        read_only=True
-    )
-    current_price = serializers.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        required=False  # Make optional in API but handled in model
-    )
-    
-    # All computed fields now never return null
-    current_value = serializers.DecimalField(
-        max_digits=15, 
-        decimal_places=2, 
-        read_only=True
-    )
-    gain_loss = serializers.DecimalField(
-        max_digits=15, 
-        decimal_places=2, 
-        read_only=True
-    )
-    roi = serializers.DecimalField(
-        max_digits=10, 
-        decimal_places=2, 
-        read_only=True
-    )
-    is_profitable = serializers.BooleanField(read_only=True)
-
-    class Meta:
-        model = MonthlyInvestment
-        fields = [
-            'id', 'goal', 'date', 'purchase_price', 'quantity', 
-            'current_price', 'notes', 'total_cost', 'current_value',
-            'gain_loss', 'roi', 'is_profitable'
-        ]
-
 class InvestmentGoalSerializer(serializers.ModelSerializer):
     total_invested = serializers.DecimalField(
         max_digits=15, 
@@ -74,6 +36,47 @@ class InvestmentGoalSerializer(serializers.ModelSerializer):
             'portfolio_roi'
         ]
 
+
+class MonthlyInvestmentSerializer(serializers.ModelSerializer):
+    total_cost = serializers.DecimalField(
+        max_digits=15, 
+        decimal_places=2, 
+        read_only=True
+    )
+    current_price = serializers.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        required=False  # Make optional in API but handled in model
+    )
+    
+    # All computed fields now never return null
+    current_value = serializers.DecimalField(
+        max_digits=15, 
+        decimal_places=2, 
+        read_only=True
+    )
+    gain_loss = serializers.DecimalField(
+        max_digits=15, 
+        decimal_places=2, 
+        read_only=True
+    )
+    roi = serializers.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        read_only=True
+    )
+    is_profitable = serializers.BooleanField(read_only=True)
+
+    goal = InvestmentGoalSerializer(read_only=True)
+
+
+    class Meta:
+        model = MonthlyInvestment
+        fields = [
+            'id', 'goal', 'date', 'purchase_price', 'quantity', 
+            'current_price', 'notes', 'total_cost', 'current_value',
+            'gain_loss', 'roi', 'is_profitable'
+        ]
 
 # login shit 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
