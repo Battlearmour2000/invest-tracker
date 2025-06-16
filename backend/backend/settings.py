@@ -62,7 +62,20 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'backend.urls'
 
-CORS_ORIGIN_ALLOW_ALL = True  
+CSRF_TRUSTED_ORIGINS = [
+    'https://92b5-155-12-14-162.ngrok-free.app',
+]
+
+
+# CORS_ORIGIN_ALLOW_ALL = True  
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "https://92b5-155-12-14-162.ngrok-free.app",  # add your ngrok URL here
+]
+
+# Allow cookies/credentials if needed:
+CORS_ALLOW_CREDENTIALS = True
 
 TEMPLATES = [
     {
