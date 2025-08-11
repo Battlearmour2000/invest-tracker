@@ -1,5 +1,11 @@
 import { Link } from 'react-router-dom';
 
+const handleLogout = ()=> {
+  localStorage.removeItem("access_token");
+  localStorage.removeItem("refresh_token");
+  window.location.href='/login';
+}
+
 export default function Header() {
   return (
     <header className="bg-white shadow">
@@ -8,10 +14,7 @@ export default function Header() {
           Investment Tracker
         </Link>
         <nav className="flex space-x-4">
-          <Link to="/" className="text-gray-600 hover:text-indigo-600">
-            Dashboard
-          </Link>
-          <button className="text-gray-600 hover:text-indigo-600">
+          <button onClick={handleLogout} className="text-gray-600 hover:text-indigo-600">
             Logout
           </button>
         </nav>

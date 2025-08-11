@@ -14,6 +14,7 @@ from datetime import timedelta
 from pathlib import Path
 import os
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -37,16 +38,20 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 INSTALLED_APPS = [
+    'channels',
+    'daphne',
+    'investments',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_filters',
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
-    'investments'
+    
 ]
 
 MIDDLEWARE = [
@@ -63,7 +68,8 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'backend.urls'
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://92b5-155-12-14-162.ngrok-free.app',
+    'https://b974-155-12-14-162.ngrok-free.app',
+    'https://better-pets-show.loca.lt'
 ]
 
 
@@ -71,16 +77,34 @@ CSRF_TRUSTED_ORIGINS = [
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
-    "https://92b5-155-12-14-162.ngrok-free.app",  # add your ngrok URL here
+    "https://b974-155-12-14-162.ngrok-free.app",  # add your ngrok URL here
+    "https://better-pets-show.loca.lt",
 ]
 
 # Allow cookies/credentials if needed:
 CORS_ALLOW_CREDENTIALS = True
 
+TEMPLATES_DIR = os.path.join(BASE_DIR, 'build')
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'build', 'static'),
+]
+
+ASGI_APPLICATION = 'backend.asgi.application'
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("localhost", 6379)], #use 'redis' instead of 'localhost' if using Docker
+        },
+    },
+}
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'frontend', 'build')],
+        # 'DIRS': [os.path.join(BASE_DIR, 'frontend', 'build')],
+        'DIRS': [TEMPLATES_DIR],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -95,7 +119,10 @@ TEMPLATES = [
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 25, 
 }
 
 SIMPLE_JWT = {
@@ -116,6 +143,8 @@ DATABASES = {
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
+
+AUTH_USER_MODEL = 'investments.CustomUser'
 
 AUTH_PASSWORD_VALIDATORS = [
     {

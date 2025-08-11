@@ -1,39 +1,89 @@
 import React from "react";
 import { useForm, Controller } from "react-hook-form";
 import { NumericFormat } from "react-number-format";
-import { Investment_Goal, InvestmentGoal } from "../../types";
+import { InvestmentGoal } from "../../types";
+import { useQuery } from "@tanstack/react-query";
+import api from "../../api/client";
+
+type AssetOption = {
+  id: string;
+  name: string;
+  ticker: string;
+  asset_type: string;
+};
 
 type GoalFormProps = {
   onSubmit: (data: InvestmentGoal) => void | Promise<void>;
+  defaultValues?: Partial<InvestmentGoal>;
+  assets: AssetOption[]; // <-- Add this line
 };
 
-const GoalForm: React.FC<GoalFormProps> = ({ onSubmit }) => {
-  const { register, handleSubmit, control, formState: { errors } } = useForm<InvestmentGoal>();
+const GoalForm: React.FC<GoalFormProps> = ({ onSubmit, defaultValues, assets: initialAssets }) => {
+  const { register, handleSubmit, control, setValue, formState: { errors } } = useForm<InvestmentGoal>({
+    defaultValues,
+  });
+
+  const { data: assetsData, isLoading } = useQuery({
+    queryKey: ['assets'],
+    queryFn: () => api.get('/assets/').then(res => res.data),
+  });
+
+  // If paginated, use assetsData.results
+  const assets = assetsData?.results || initialAssets;
+
+  console.log("Assets in GoalForm:", assets);
+
+  if (!assets) return null; // Don't render form if assets are not available
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      {/* investment name */}
+    <form
+      onSubmit={handleSubmit((data) => {
+        console.log("Goal form payload:", data); // <-- Add this line
+        onSubmit(data);
+      })}
+      className="space-y-4"
+    >
+      {/* investment name & asset selection */}
       <div>
-        <label className="block mb-1">Investment name</label>
-        <input
-          {...register("name", { required: "Name is required" })}
-          className="border rounded px-2 py-1 w-full"
+        <label className="block mb-1">Investment Asset</label>
+        <Controller
+          name="asset"
+          control={control}
+          rules={{ required: "Asset is required" }}
+          render={({ field }) => (
+            <select
+              {...field}
+              className="border rounded px-2 py-1 w-full"
+              onChange={e => {
+                field.onChange(e);
+                const selectedAsset = assets.find((a: AssetOption) => String(a.id) === e.target.value);
+                setValue("name", selectedAsset ? selectedAsset.name : "");
+                setValue("investment_type", selectedAsset ? selectedAsset.asset_type : "");
+              }}
+            >
+              <option value="">Select asset</option>
+              {assets.length === 0 && (
+                <option value="">No assets available</option>
+              )}
+              {assets.map((asset: AssetOption) => (
+                <option key={asset.id} value={asset.id}>
+                  {asset.name} ({asset.ticker}) [{asset.asset_type === "STOCK" ? "Stock" : "Mutual Fund"}]
+                </option>
+              ))}
+            </select>
+          )}
         />
-        {errors.name && <span className="text-red-500">{errors.name.message}</span>}
+        {errors.asset && <span className="text-red-500">{errors.asset.message}</span>}
       </div>
-      {/* investment type */}
-      <div>
-        <label className="block mb-1">Investment Type</label>
-        <select
-          {...register("investment_type", { required: "Investment type is required" })}
-          className="border rounded px-2 py-1 w-full"
-        >
-          <option value="">Select type</option>
-          <option value="STOCK">Stocks</option>
-          <option value="MUTUAL_FUND">Mutual Funds</option>
-        </select>
-        {errors.investment_type && <span className="text-red-500">{errors.investment_type.message}</span>}
-      </div>
+      {/* investment name (auto-filled, hidden) */}
+      <input
+        type="hidden"
+        {...register("name")}
+      />
+      <input
+        type="hidden"
+        {...register("investment_type")}
+      />
 
       {/* target amount */}
       <div>

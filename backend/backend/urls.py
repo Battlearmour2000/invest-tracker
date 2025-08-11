@@ -24,5 +24,5 @@ urlpatterns = [
     path('/', include('rest_framework.urls')),
     path('api/', include('investments.urls')),
     # Catch-all for frontend
-    re_path(r'^.*$', TemplateView.as_view(template_name='index.html')),
+    re_path(r'', TemplateView.as_view(template_name='index.html')),
 ]

@@ -11,14 +11,39 @@ type InvestmentFormProps = {
 const InvestmentForm: React.FC<InvestmentFormProps> = ({ onSubmit }) => {
   const { register, handleSubmit, formState: { errors } } = useForm<MonthlyInvestment>();
 
-  // Fetch goals for the select dropdown
   const { data: goals, isLoading } = useQuery({
     queryKey: ['goals'],
     queryFn: () => api.get('/goals/').then(res => res.data),
   });
+  console.log("Fetched goals:", goals)
+
+  // Custom submit handler to inject asset_id from selected goal
+  const handleFormSubmit: SubmitHandler<MonthlyInvestment> = (data) => {
+    const selectedGoal = goals?.find((goal: any) => goal.id === Number(data.goal));
+    console.log("Selected goal:", selectedGoal);
+
+    if (!selectedGoal || !selectedGoal.asset || !selectedGoal.asset.id) {
+      // handle error (e.g., show a message)
+      alert("Selected goal does not have a valid asset.");
+      return;
+    }
+
+    // Get the asset ID (handles both cases: raw ID or nested object)
+    const assetId = typeof selectedGoal.asset === 'object' 
+      ? selectedGoal.asset.id 
+      : selectedGoal.asset;
+
+
+    const payload = {
+      ...data,
+      asset_id: assetId,
+      goal_id: selectedGoal.id // Use asset from the selected goal
+    };
+    onSubmit(payload);
+  };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
       <div>
         <label className="block mb-1">Investment Goal</label>
         <select
@@ -26,7 +51,7 @@ const InvestmentForm: React.FC<InvestmentFormProps> = ({ onSubmit }) => {
           className="border rounded px-2 py-1 w-full"
         >
           <option value="">Select goal</option>
-          {goals && goals.map((goal: GoalWithStats) => (
+          {goals && goals.map((goal: any) => (
             <option key={goal.id} value={goal.id}>
               {goal.name}
             </option>

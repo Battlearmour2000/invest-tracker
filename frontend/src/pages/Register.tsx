@@ -14,7 +14,8 @@ export default function Register() {
 
   const onSubmit = async (data: RegisterForm) => {
     try {
-      await api.post('/auth/register/', data);
+      await api.post('/register/', data);
+      console.log("registration payload:", data); // <-- Add this line
       navigate('/login');
     } catch (error) {
       console.error('Registration failed:', error);

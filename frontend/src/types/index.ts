@@ -1,14 +1,25 @@
 export interface InvestmentGoal {
-  id: number;
+  id?: string;
   name: string;
   investment_type: string;
+  asset: string; // or number, depending on your backend
   target_amount: number;
   years_to_invest: number;
   monthly_contribution: number;
   created_at: string;
 }
 
-export interface GoalWithStats extends InvestmentGoal {
+export type GoalWithStats = {
+  id: number;
+  name: string;
+  target_amount: number;
+  asset: {
+    id: number;
+    name: string;
+    ticker: string;
+    asset_type: string;
+    current_price: string;
+  };
   total_invested: number;
   current_portfolio_value: number;
   net_gain_loss: number;
@@ -58,4 +69,11 @@ export type Investment_Goal = {
   target_amount: number;
   years_to_invest: number;
   monthly_contribution: number
+};
+
+export type PaginatedInvestments = {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: Investment[];
 };

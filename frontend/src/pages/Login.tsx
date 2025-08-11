@@ -1,5 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
 import api from '../api/client';
 
 type LoginForm = {
@@ -10,15 +11,34 @@ type LoginForm = {
 export default function Login() {
   const { register, handleSubmit } = useForm<LoginForm>();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const onSubmit = async (data: LoginForm) => {
+    setLoading(true);
+    setErrorMsg(null);
+    console.log("Login payload:", data); // <-- Add this line
     try {
       const response = await api.post('/login/', data);
       localStorage.setItem('access_token', response.data.access);
       localStorage.setItem('refresh_token', response.data.refresh);
-      navigate('/');
-    } catch (error) {
-      console.error('Login failed:', error);
+      localStorage.setItem('user_id', response.data.user_id);
+      localStorage.setItem('username', response.data.username);
+      localStorage.setItem('email', response.data.email);
+      localStorage.setItem('is_data_admin', response.data.is_data_admin);
+      if (response.data.is_data_admin) {
+        navigate('/admin-dashboard');
+      } else {
+        navigate('/dashboard');
+      }
+    } catch (error: any) {
+      setErrorMsg(
+        error?.response?.data?.detail ||
+        error?.response?.data?.non_field_errors?.[0] ||
+        "Login failed. Please check your credentials."
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -33,6 +53,7 @@ export default function Login() {
               {...register('username', { required: true })}
               className="input-field"
               type="text"
+              disabled={loading}
             />
           </div>
           <div>
@@ -41,10 +62,24 @@ export default function Login() {
               {...register('password', { required: true })}
               className="input-field"
               type="password"
+              disabled={loading}
             />
           </div>
-          <button type="submit" className="btn-primary w-full">
-            Sign In
+          {errorMsg && (
+            <div className="text-red-600 text-sm">{errorMsg}</div>
+          )}
+          <button type="submit" className="btn-primary w-full" disabled={loading}>
+            {loading ? (
+              <span className="flex items-center justify-center">
+                <svg className="animate-spin h-5 w-5 mr-2 text-white" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
+                </svg>
+                Signing In...
+              </span>
+            ) : (
+              "Sign In"
+            )}
           </button>
         </form>
         <div className="mt-4 text-center">
